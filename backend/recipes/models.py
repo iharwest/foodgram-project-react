@@ -1,3 +1,4 @@
+from colorfield.fields import ColorField
 from django.db import models
 
 from users.models import User
@@ -10,7 +11,7 @@ class Tag(models.Model):
         verbose_name='Название',
         help_text='Введите название тега'
     )
-    color = models.CharField(
+    color = ColorField(
         max_length=7,
         unique=True,
         verbose_name='Цвет в HEX',
@@ -77,6 +78,7 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField(
         Ingredient,
         through='IngredientInRecipe',
+        through_fields=('recipe', 'ingredient'),
         verbose_name='Ингредиенты',
         help_text='Выберите ингредиенты'
     )
@@ -117,6 +119,7 @@ class IngredientInRecipe(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
+        related_name='ingredient_in_recipe',
         verbose_name='Рецепт'
     )
     amount = models.PositiveSmallIntegerField(
@@ -129,12 +132,12 @@ class IngredientInRecipe(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=['ingredient', 'recipe'],
-                name='unique_ingredient_recipe'
+                name='unique_ingredient'
             )
         ]
 
     def __str__(self):
-        return f'{self.ingredient} in {self.recipe}'
+        return f'{self.recipe} - {self.ingredient}'
 
 
 class Favorite(models.Model):
@@ -167,18 +170,18 @@ class Favorite(models.Model):
         return f'{self.user} added {self.recipe} to favorite'
 
 
-class ShoppingList(models.Model):
+class ShoppingCart(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='shopping_list',
+        related_name='shopping_cart',
         verbose_name='Список покупок',
         help_text='Список покупок пользователя'
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='shopping_list',
+        related_name='shopping_cart',
         verbose_name='В списке у пользователей'
     )
 
@@ -188,7 +191,7 @@ class ShoppingList(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'recipe'],
-                name='unique_shopping_list'
+                name='unique_recipe'
             ),
         ]
 

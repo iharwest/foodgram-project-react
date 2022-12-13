@@ -1,10 +1,16 @@
 from django.contrib import admin
 
 from recipes.models import (Favorite, Ingredient, IngredientInRecipe, Recipe,
-                            ShoppingList, Tag)
+                            ShoppingCart, Tag)
+
+
+class IngredientInRecipeInline(admin.TabularInline):
+    model = Recipe.ingredients.through
+    extra = 1
 
 
 class RecipeAdmin(admin.ModelAdmin):
+    inlines = (IngredientInRecipeInline,)
     list_display = (
         'name',
         'author'
@@ -25,7 +31,8 @@ class IngredientAdmin(admin.ModelAdmin):
         'name',
         'measurement_unit'
     )
-    list_filter = ('name',)
+    search_fields = ('measurement_unit',)
+    list_filter = ('measurement_unit',)
 
 
 class IngredientInRecipeAdmin(admin.ModelAdmin):
@@ -34,7 +41,7 @@ class IngredientInRecipeAdmin(admin.ModelAdmin):
         'recipe',
         'amount'
     )
-    list_filter = ('ingredient', 'amount')
+    search_fields = ('recipe__name', 'ingredient__name')
 
 
 class TagAdmin(admin.ModelAdmin):
@@ -46,12 +53,16 @@ class TagAdmin(admin.ModelAdmin):
     list_filter = ('name', 'color', 'slug')
 
 
-class ShoppingListAdmin(admin.ModelAdmin):
+class ShoppingCartAdmin(admin.ModelAdmin):
     list_display = (
         'user',
         'recipe'
     )
-    list_filter = ('user', 'recipe')
+    search_fields = (
+        'user__username',
+        'user__email',
+        'recipe__name'
+    )
 
 
 class FavoriteAdmin(admin.ModelAdmin):
@@ -59,12 +70,16 @@ class FavoriteAdmin(admin.ModelAdmin):
         'user',
         'recipe'
     )
-    list_filter = ('user', 'recipe')
+    search_fields = (
+        'user__username',
+        'user__email',
+        'recipe__name'
+    )
 
 
 admin.site.register(Favorite, FavoriteAdmin)
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(IngredientInRecipe, IngredientInRecipeAdmin)
-admin.site.register(ShoppingList, ShoppingListAdmin)
+admin.site.register(ShoppingCart, ShoppingCartAdmin)
 admin.site.register(Tag, TagAdmin)

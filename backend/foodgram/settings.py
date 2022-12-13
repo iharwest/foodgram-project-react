@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
+    'colorfield',
     'djoser',
     'recipes',
     'users',
@@ -140,3 +141,5 @@ DEFAULT_EMAIL_SUBJECT = 'Your confirmation code'
 DJOSER = {
     'LOGIN_FIELD': 'email'
 }
+
+SHOPPING_CART_FILE_NAME = 'shopping_list.txt'

@@ -10,7 +10,7 @@ from users.serializers import FollowSerializer, FollowerSerializer
 
 
 class FollowViewSet(ListAPIView):
-    serializer_class = FollowerSerializer
+    serializer_class = FollowSerializer
     pagination_class = CustomPagination
     permission_classes = (IsAuthenticated,)
 
@@ -27,7 +27,7 @@ class FollowerView(views.APIView):
         author = get_object_or_404(User, pk=pk)
         user = self.request.user
         data = {'author': author.id, 'user': user.id}
-        serializer = FollowSerializer(
+        serializer = FollowerSerializer(
             data=data, context={'request': request}
         )
         serializer.is_valid(raise_exception=True)

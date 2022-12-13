@@ -1,34 +1,18 @@
-from django.shortcuts import get_object_or_404
-from rest_framework import status
-from rest_framework.response import Response
-
-from recipes.models import Recipe
-
-from .serializers import ShortRecipeSerializer
+from django.conf import settings
+from django.http import HttpResponse
 
 
-def get_post(request, recipe_id, acted_model):
-    user = request.user
-    recipe = get_object_or_404(Recipe, id=recipe_id)
-    if acted_model.objects.filter(user=user, recipe=recipe).exists():
-        return Response(
-            'Рецепт уже добавлен',
-            status=status.HTTP_400_BAD_REQUEST)
-    acted_model.objects.create(user=user, recipe=recipe)
-    serializer = ShortRecipeSerializer(recipe)
-    return Response(
-        serializer.data,
-        status=status.HTTP_201_CREATED)
-
-
-def get_delete(request, recipe_id, acted_model):
-    user = request.user
-    recipe = get_object_or_404(Recipe, id=recipe_id)
-    favorite_obj = get_object_or_404(acted_model, user=user, recipe=recipe)
-    if not favorite_obj:
-        return Response(
-            'Рецепт не был добавлен',
-            status=status.HTTP_400_BAD_REQUEST)
-    favorite_obj.delete()
-    return Response(
-        'Удалено', status=status.HTTP_204_NO_CONTENT)
+def convert_txt(shop_list):
+    file_name = settings.SHOPPING_CART_FILE_NAME
+    lines = []
+    for ing in shop_list:
+        name = ing['ingredient__name']
+        measurement_unit = ing['ingredient__measurement_unit']
+        amount = ing['ingredient_total']
+        lines.append(f'{name} ({measurement_unit}) - {amount}')
+    lines.append('\nFoodGram Service')
+    content = '\n'.join(lines)
+    content_type = 'text/plain,charset=utf8'
+    response = HttpResponse(content, content_type=content_type)
+    response['Content-Disposition'] = f'attachment; filename={file_name}'
+    return response
