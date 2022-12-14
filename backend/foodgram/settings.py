@@ -6,7 +6,7 @@ load_dotenv()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SECRET_KEY = os.getenv('SECRET_KEY', default='d3y&^+2*i283n7wgx@ky6v0&-!@j=j!fxzs-57-e$&lyhqtun5')
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 DEBUG = False
 
@@ -26,8 +26,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
-    'colorfield',
     'djoser',
+    'colorfield',
     'recipes',
     'users',
     'api',
@@ -129,8 +129,6 @@ REST_FRAMEWORK = {
 
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.'
                                 'PageNumberPagination',
-
-    'PAGE_SIZE': 6
 }
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
