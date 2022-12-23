@@ -10,6 +10,8 @@ from users.serializers import FollowSerializer, FollowerSerializer
 
 
 class FollowViewSet(ListAPIView):
+    """Вьюсет подписки."""
+
     serializer_class = FollowSerializer
     pagination_class = CustomPagination
     permission_classes = (IsAuthenticated,)
@@ -20,6 +22,8 @@ class FollowViewSet(ListAPIView):
 
 
 class FollowerView(views.APIView):
+    """Подписка и отписка от пользователя."""
+
     pagination_class = CustomPagination
     permission_classes = (IsAuthenticated,)
 

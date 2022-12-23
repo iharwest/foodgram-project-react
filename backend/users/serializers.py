@@ -1,13 +1,12 @@
-from djoser.serializers import UserSerializer
+from django.db.models import BooleanField, Count, Exists, OuterRef, Value
+from djoser.serializers import UserSerializer as DjoserUserSerializer
 from rest_framework import serializers
-
 from recipes.models import Recipe
 from users.models import Follow, User
-
 import api.serializers
 
 
-class CurrentUserSerializer(UserSerializer):
+class UserSerializer(DjoserUserSerializer):
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
@@ -65,13 +64,9 @@ class FollowSerializer(serializers.ModelSerializer):
     username = serializers.ReadOnlyField(source='author.username')
     first_name = serializers.ReadOnlyField(source='author.first_name')
     last_name = serializers.ReadOnlyField(source='author.last_name')
-    is_subscribed = serializers.SerializerMethodField(
-        method_name='get_is_subscribed'
-    )
+    is_subscribed = serializers.BooleanField(read_only=True)
     recipes = serializers.SerializerMethodField(method_name='get_recipes')
-    recipes_count = serializers.SerializerMethodField(
-        method_name='get_recipes_count'
-    )
+    recipes_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Follow
@@ -86,11 +81,20 @@ class FollowSerializer(serializers.ModelSerializer):
             'recipes_count'
         )
 
-    def get_is_subscribed(self, obj):
-        request = self.context.get('request')
-        return Follow.objects.filter(
-            author=obj.author, user=request.user
-        ).exists()
+    def get_is_subscribed(self):
+        qs = User.objects.all()
+        if self.request.user.is_authenticated:
+            qs = qs.annotate(
+                is_subscribed=Exists(
+                    self.request.user.follower.filter(
+                        author=OuterRef('id'),
+                    )).prefetch_related('follower', 'following')
+            )
+        else:
+            qs = qs.annotate(
+                is_subscribed=Value(False, output_field=BooleanField())
+            )
+        return qs
 
     def get_recipes(self, obj):
         request = self.context.get('request')
@@ -106,5 +110,10 @@ class FollowSerializer(serializers.ModelSerializer):
         )
         return serializer.data
 
-    def get_recipes_count(self, obj):
-        return obj.author.recipes.count()
+    def get_recipes_count(self):
+        return self.request.user.follower.select_related(
+            'following'
+        ).prefetch_related(
+            'following__recipe'
+        ).annotate(
+            recipes_count=Count('following__recipe'))

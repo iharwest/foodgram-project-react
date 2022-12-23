@@ -9,6 +9,7 @@ class IngredientInRecipeInline(admin.TabularInline):
     extra = 1
 
 
+@admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     inlines = (IngredientInRecipeInline,)
     list_display = (
@@ -26,6 +27,7 @@ class RecipeAdmin(admin.ModelAdmin):
         return instance.favorite_recipes.count()
 
 
+@admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
     list_display = (
         'name',
@@ -35,6 +37,7 @@ class IngredientAdmin(admin.ModelAdmin):
     list_filter = ('measurement_unit',)
 
 
+@admin.register(IngredientInRecipe)
 class IngredientInRecipeAdmin(admin.ModelAdmin):
     list_display = (
         'ingredient',
@@ -44,6 +47,7 @@ class IngredientInRecipeAdmin(admin.ModelAdmin):
     search_fields = ('recipe__name', 'ingredient__name')
 
 
+@admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     list_display = (
         'name',
@@ -53,6 +57,7 @@ class TagAdmin(admin.ModelAdmin):
     list_filter = ('name', 'color', 'slug')
 
 
+@admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
     list_display = (
         'user',
@@ -65,6 +70,7 @@ class ShoppingCartAdmin(admin.ModelAdmin):
     )
 
 
+@admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):
     list_display = (
         'user',
@@ -75,11 +81,3 @@ class FavoriteAdmin(admin.ModelAdmin):
         'user__email',
         'recipe__name'
     )
-
-
-admin.site.register(Favorite, FavoriteAdmin)
-admin.site.register(Recipe, RecipeAdmin)
-admin.site.register(Ingredient, IngredientAdmin)
-admin.site.register(IngredientInRecipe, IngredientInRecipeAdmin)
-admin.site.register(ShoppingCart, ShoppingCartAdmin)
-admin.site.register(Tag, TagAdmin)

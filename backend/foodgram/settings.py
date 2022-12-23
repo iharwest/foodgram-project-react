@@ -139,8 +139,8 @@ DEFAULT_EMAIL_SUBJECT = 'Your confirmation code'
 DJOSER = {
     "LOGIN_FIELD": 'email',
     'SERIALIZERS': {
-        'user': 'users.serializers.CurrentUserSerializer',
-        'current_user': 'users.serializers.CurrentUserSerializer',
+        'user': 'users.serializers.UserSerializer',
+        'current_user': 'users.serializers.UserSerializer',
     },
     'PERMISSIONS': {
         'activation': ['rest_framework.permissions.AllowAny'],

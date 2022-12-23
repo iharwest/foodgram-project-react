@@ -3,6 +3,8 @@ from django.http import HttpResponse
 
 
 def convert_txt(shop_list):
+    """Формирование списка ингридиентов."""
+
     file_name = settings.SHOPPING_CART_FILE_NAME
     lines = []
     for ing in shop_list:

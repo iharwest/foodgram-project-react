@@ -1,10 +1,10 @@
 from django.db import transaction
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers, validators
+from rest_framework.serializers import BooleanField
 
 import users.serializers as users
-from recipes.models import (Ingredient, IngredientInRecipe, Favorite, Recipe,
-                            ShoppingCart, Tag)
+from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -69,7 +69,7 @@ class AddIngredientSerializer(serializers.ModelSerializer):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    author = users.CurrentUserSerializer()
+    author = users.UserSerializer()
     tags = TagField(
         slug_field='id', queryset=Tag.objects.all(), many=True
     )
@@ -78,30 +78,14 @@ class RecipeSerializer(serializers.ModelSerializer):
         read_only=True, many=True
     )
     image = Base64ImageField()
-    is_favorited = serializers.SerializerMethodField(
-        method_name='get_is_favorited'
-    )
-    is_in_shopping_cart = serializers.SerializerMethodField(
-        method_name='get_is_in_shopping_cart'
-    )
+    is_favorited = BooleanField(read_only=True)
+    is_in_shopping_cart = BooleanField(read_only=True)
 
     class Meta:
         model = Recipe
         fields = ('id', 'tags', 'author', 'ingredients',
                   'is_favorited', 'is_in_shopping_cart',
                   'name', 'image', 'text', 'cooking_time')
-
-    def in_list(self, obj, model):
-        request = self.context.get('request')
-        if request is None or request.user.is_anonymous:
-            return False
-        return model.objects.filter(user=request.user, recipe=obj).exists()
-
-    def get_is_favorited(self, obj):
-        return self.in_list(obj, Favorite)
-
-    def get_is_in_shopping_cart(self, obj):
-        return self.in_list(obj, ShoppingCart)
 
 
 class CreateRecipeSerializer(serializers.ModelSerializer):
@@ -127,14 +111,13 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         return serializer.data
 
     def add_ingredients(self, ingredients, recipe):
-        for ingredient in ingredients:
-            amount = ingredient['amount']
-            ingredient = ingredient['id']
-            ingredients, created = IngredientInRecipe.objects.get_or_create(
+        IngredientInRecipe.objects.bulk_create(
+            [IngredientInRecipe(
                 recipe=recipe,
-                ingredient=ingredient,
-                amount=amount
-            )
+                ingredient=ingredient.get("id"),
+                amount=ingredient.get("amount"),
+            ) for ingredient in ingredients]
+        )
 
     @transaction.atomic
     def create(self, validated_data):
