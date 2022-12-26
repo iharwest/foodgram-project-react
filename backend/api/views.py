@@ -18,11 +18,7 @@ from .serializers import (TagSerializer, IngredientSerializer,
 from .utils import convert_txt
 
 
-class TagViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet
-):
+class TagViewSet(viewsets.ReadOnlyModelViewSet):
     """Миксина для списка тегов."""
 
     queryset = Tag.objects.all()
@@ -30,7 +26,11 @@ class TagViewSet(
     permission_classes = (AllowAny,)
 
 
-class IngredientViewSet(TagViewSet):
+class IngredientViewSet(
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet
+):
     """Миксина для списка ингридиентов."""
 
     queryset = Ingredient.objects.all()
@@ -42,7 +42,6 @@ class IngredientViewSet(TagViewSet):
 class RecipeViewSet(viewsets.ModelViewSet):
     """Вьюсет для рецептов."""
 
-    queryset = Recipe.objects.prefetch_related('ingredients')
     permission_classes = (IsAuthorOrReadOnly,)
     pagination_class = CustomPagination
     filter_backends = (DjangoFilterBackend,)
@@ -55,17 +54,17 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Избранное и список покупок."""
-        queryset = Recipe.objects.all()
+        queryset = Recipe.objects.prefetch_related('ingredients', 'tags')
         if self.request.user.is_authenticated:
             queryset = queryset.annotate(
                 is_favorited=Exists(
                     Favorite.objects.filter(
-                        user=self.request.user, recipe__id=OuterRef("id")
+                        user=self.request.user, recipe__id=OuterRef('id')
                     )
                 ),
                 is_in_shopping_cart=Exists(
                     ShoppingCart.objects.filter(
-                        user=self.request.user, recipe__id=OuterRef("id")
+                        user=self.request.user, recipe__id=OuterRef('id')
                     )
                 ),
             )
@@ -89,8 +88,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
         if request.method == 'POST':
             return self.add_recipe(ShoppingCart, request, pk)
-        else:
-            return self.delete_recipe(ShoppingCart, request, pk)
+        return self.delete_recipe(ShoppingCart, request, pk)
 
     @action(
         detail=True,
@@ -102,8 +100,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
         if request.method == 'POST':
             return self.add_recipe(Favorite, request, pk)
-        else:
-            return self.delete_recipe(Favorite, request, pk)
+        return self.delete_recipe(Favorite, request, pk)
 
     @action(
         detail=False,

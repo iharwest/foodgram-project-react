@@ -14,15 +14,6 @@ class TagSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class TagField(serializers.SlugRelatedField):
-
-    def to_representation(self, value):
-        request = self.context.get('request')
-        context = {'request': request}
-        serializer = TagSerializer(value, context=context)
-        return serializer.data
-
-
 class IngredientSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -70,9 +61,7 @@ class AddIngredientSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     author = users.UserSerializer()
-    tags = TagField(
-        slug_field='id', queryset=Tag.objects.all(), many=True
-    )
+    tags = TagSerializer(read_only=True, many=True)
     ingredients = IngredientInRecipeSerializer(
         source='ingredient_in_recipe',
         read_only=True, many=True
@@ -114,8 +103,8 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         IngredientInRecipe.objects.bulk_create(
             [IngredientInRecipe(
                 recipe=recipe,
-                ingredient=ingredient.get("id"),
-                amount=ingredient.get("amount"),
+                ingredient=ingredient.get('id'),
+                amount=ingredient.get('amount'),
             ) for ingredient in ingredients]
         )
 
