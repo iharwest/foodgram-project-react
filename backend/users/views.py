@@ -1,12 +1,12 @@
+from api.pagination import CustomPagination
 from django.shortcuts import get_object_or_404
 from rest_framework import status, views
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from api.pagination import CustomPagination
 from users.models import Follow, User
-from users.serializers import FollowSerializer, FollowerSerializer
+from users.serializers import FollowerSerializer, FollowSerializer
 
 
 class FollowViewSet(ListAPIView):

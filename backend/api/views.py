@@ -1,20 +1,20 @@
 from django.db.models import BooleanField, Exists, OuterRef, Sum, Value
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import mixins, viewsets, status
+from recipes.models import (Favorite, Ingredient, IngredientInRecipe, Recipe,
+                            ShoppingCart, Tag)
+from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny, IsAuthenticated, SAFE_METHODS
+from rest_framework.permissions import SAFE_METHODS, AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.validators import ValidationError
 
-from recipes.models import (Favorite, Ingredient, IngredientInRecipe, Recipe,
-                            ShoppingCart, Tag)
 from .filters import IngredientFilter, RecipeFilter
 from .pagination import CustomPagination
 from .permissions import IsAuthorOrReadOnly
-from .serializers import (TagSerializer, IngredientSerializer,
-                          RecipeSerializer, CreateRecipeSerializer,
-                          ShortRecipeSerializer)
+from .serializers import (CreateRecipeSerializer, IngredientSerializer,
+                          RecipeSerializer, ShortRecipeSerializer,
+                          TagSerializer)
 from .utils import convert_txt
 
 

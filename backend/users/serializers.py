@@ -1,9 +1,10 @@
+import api.serializers
 from django.db.models import BooleanField, Count, Exists, OuterRef, Value
 from djoser.serializers import UserSerializer as DjoserUserSerializer
-from rest_framework import serializers
 from recipes.models import Recipe
+from rest_framework import serializers
+
 from users.models import Follow, User
-import api.serializers
 
 
 class UserSerializer(DjoserUserSerializer):
