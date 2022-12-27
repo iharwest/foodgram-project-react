@@ -70,9 +70,6 @@ docker-compose exec backend python manage.py load_data ingredients.csv
 ----------
 Документация для API после установки доступна по адресу 
 
-```http://158.160.9.62/api/docs/```
+```http://127.0.0.1/api/docs/```
 
 Автор: [Николаев Алексей](https://github.com/iharwest)
-
-admin login: dkphobos
-   password: dgmuw8d8
